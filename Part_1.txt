@@ -1,0 +1,60 @@
+Test Execution Questions:
+    1. In general, you run a test and it fails. What is the first thing you do?
+
+    A: First check log files of application where failure occured and deduce what caused the issue,
+        if that doesn't solve the problem run application in debug mode with breakpoints around the line
+        where the failure occured and figure out what functionality is breaking. 
+
+    2. What are five high level possible reasons for a test failure in an end-to-end integration
+        environment?
+    
+    A:  - Entry with ORDER_ID not added to Order Table
+        - Entry with TRADE_ID not added to Fill table after order is filled 
+        - Ack with correct ORDER_ID not sent back to the user 
+        - User order filled at current price not contract price 
+        - User not receiving fill message with TRADE_ID
+    
+    3. A user enters an Order to buy 100 units of Contract A @ $100 each but does not receive an
+        ACK. What troubleshooting steps would you take?
+    
+    A: First thing will be to check the order flow between user / router and router / engine to make sure 
+        the order information has reached the engine.
+        If order information is recieved then I will check if an ORDER_ID is being generated and an entry is 
+        being added to the DB. 
+        Lastly I would track the ack with the ORDER_ID going back to the user to see if a failure is occuring 
+        in the engine or router on the way back.  
+    
+    4. A user enters an Order to buy 100 units of Contract A @$100 each, the ACK and Fill are both
+        received but the other WAN users do not receive this information. What troubleshooting
+        steps would you take?
+    
+    A: If the user has received both ACK and Fill confirmation the only place there could be a problem 
+        is with the DB writes or reads. I would first check the logs to make sure both entries to the Order and Fill
+        tables were successful. If so I would go into the DB and make a query call for that ORDER_ID and make sure 
+        all information is as expected, followed by the same procedure using TRADE_ID for the Fill table.
+        If everything is correct I would check the code in the engine for reading the information from the DB  
+        and sending it to the gateway to make sure it is functioning as intended.
+
+
+Database Questions:
+
+    1. Show the total count of ENGINEID that have had Fills.
+
+    A: SELECT count(Router.ENGINEID) FROM Router
+        INNER JOIN Fill ON Router.ROUTERID = Fill.ROUTERID;
+
+    2. Update Column 'OrderDate' in Fill and Order tables for Orders and Fills where date is 'March
+        22nd 2014' and time is between 10:02:00hrs and 10:10:00hrs ----> 'March 26th 2014' and
+        time 10:14:00hrs. 
+
+    A: UPDATE Order,Fill
+        SET Order.OrderDate = '2014-03-26 10:14:00',
+            Fill.OrderDate = '2014-03-26 10:14:00'
+        where Order.OrderDate >= '2014-03-22 10:02:00' and
+            Order.OrderDate <= '2014-03-22 10:10:00';
+
+    3. Pull all records that exist for both Order and Fill tables.
+
+    A: SELECT * FROM Order o
+       JOIN Fill f
+       ON o.ORDID = f.ORDID
