@@ -30,7 +30,7 @@ Individually install each package or run:
 # Using App
 
 Enter Username and Text Input and click submit,
-Table will populate with entered value with True / False to 
+Table will populate with entered value and True / False to 
 show Palindrome status 
 
 
